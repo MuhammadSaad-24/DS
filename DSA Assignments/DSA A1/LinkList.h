@@ -16,16 +16,19 @@ private :
 public:
     typedef Iterator ListIterator;//so it can be recognized globally
     LinkList();
+    LinkList(const LinkList<Type>& other);
     int Getsize() const;
     Iterator Find(const Type&);
     Iterator SearchByID(const int&);
     void AddtoHead(const Type&);
     void AddtoTail(const Type&);
+    void DeleteHead();
     void DeleteTail();
     void DeleteAfter(Iterator&);
     Iterator ReturnPrevious(Iterator&);//it will return the previous node
     Iterator ReturnPrevious(const int&);
     void MovetoHead(Iterator&);//this will move the Node to the Head
+    LinkList<Type>& operator=(const LinkList& other);
     template <typename T>
     friend ostream& operator<<(ostream&,T&);
     Iterator Begin() const;
@@ -201,6 +204,46 @@ LinkList<Type>::LinkList()
 }
 
 template <typename Type>
+LinkList<Type>::LinkList(const LinkList<Type>& other)
+{
+    Head = Tail = nullptr; 
+    size = 0;
+    
+    ListIterator oit = other.Begin();
+
+    while(!oit.IsNull())
+    {
+        AddtoTail(*oit);
+        oit++;
+    }
+
+}
+
+template <typename Type>
+LinkList<Type>& LinkList<Type>::operator=(const LinkList<Type>& other)
+{
+    if(this == &other)
+        return *this;
+
+    ListIterator it = Begin();    
+    while(it != nullptr)//to delete previous memory
+    {
+        it++;
+        DeleteHead();
+    }
+
+    ListIterator oit = other.Begin();
+
+    while(!oit.IsNull())
+    {
+        AddtoTail(*oit);
+        oit++;
+    }
+
+    return *this;
+}
+
+template <typename Type>
 int LinkList<Type>::Getsize() const
 {
     return size;
@@ -359,6 +402,26 @@ void LinkList<Type>::DeleteAfter(Iterator& it)
 }
 
 template <typename Type>
+void LinkList<Type>::DeleteHead()
+{
+    if(Head != Tail)
+    {
+        Node* temp = Head->Next;
+        delete Head;
+        Head = temp;
+        size--;
+    }
+    else if(Head == Tail && Head != nullptr)
+    {
+        delete Head;
+        Head = Tail = nullptr;
+        size = 0;
+    }
+    else
+        cout << "Error::No Node Exist\n";    
+}
+
+template <typename Type>
 void LinkList<Type>::DeleteTail()
 {
     if(Head != Tail)
@@ -378,7 +441,7 @@ void LinkList<Type>::DeleteTail()
     {
         delete Tail;
         Tail = Head = nullptr;
-        size--;
+        size = 0;
     }
     else
     {
@@ -439,6 +502,7 @@ LinkList<Type>::~LinkList()
     }
 
     Head = Tail = nullptr;
+
 }
 
 #endif
