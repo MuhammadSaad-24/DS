@@ -1,6 +1,9 @@
-// #include <iostream>
+#include <iostream>
+#include "LinkList.h"
+#include "queue"
+#include "stack"
 
-// using namespace std;
+using namespace std;
 // class Place8QueensonBoard
 // {
 // private:
@@ -113,6 +116,36 @@
 //     FabinachiSeries(0,1,num);
 // }
 
+// void Copy(char arr[],int& size,typename LinkList<char>::ListIterator it)
+// {
+//     if(!it)
+//         return;
+
+//     arr[size++] = *it;
+//     it++;
+//     Copy(arr,size,it);
+// }
+
+// bool IsPalindrome(char arr[],int high,int low)
+// {
+//     if(low >= high)
+//         return true;
+
+//     if(!(arr[low] == arr[high] || arr[low] - 32 == arr[high] || arr[low] == arr[high] - 32))
+//         return false;
+
+//     return IsPalindrome(arr,high - 1,low + 1);
+// }
+
+// bool IsPalindrome(LinkList<char>& list)
+// {
+//     int size = 0;
+//     const int s = list.Getsize();
+//     char arr[s];
+
+//     Copy(arr,size,typename LinkList<char>::ListIterator(list.Begin()));
+//     return IsPalindrome(arr,size - 1,0);
+// }
 
 // int main()
 // {
@@ -128,85 +161,256 @@
 //         {16,17,18,19,20},
 //         {21,22,23,24,25}
 //     };
+
+//     LinkList<char> list;
+//     list.AddtoTail('A');
+//     list.AddtoTail('B');
+//     list.AddtoTail('C');
+//     list.AddtoTail('b');
+//     list.AddtoTail('a');
+
+//     if(IsPalindrome(list))
+//         cout << "Link List is Plaindrome\n";
+//     else
+//         cout << "Link List is not Palindrome\n";
+
 //     return 0;
 // }
 
-#include <iostream>
-using namespace std;
+// #include "list"
+// #include "iterator"
 
-#define MAX 100
+// int main()
+// {
+//     list<int> l1;
+//     stack<int> s1;
+//     queue<int> q1;
+//     l1.remove_if(1 > 0);
+// }
 
-// a) Left -> Right on a fixed row
-void printRowLeftToRight(int matrix[][MAX], int row, int colStart, int colEnd)
+
+template <class T>
+class BSTree {
+private:
+class Bnode; // forward declaration
+    Bnode * root;
+    void visit(Bnode * ptr) { cout << ptr->data << " "; }
+    void getPredecessor(Bnode * node, T & data);
+    void deleteR(T d,Bnode*&);
+    void deleteBnode(Bnode*&);
+    void Destroy(Bnode *& node);
+    bool searchR(Bnode* ,T d);
+    void insertR(Bnode*& ,T d);
+    void InOrder(Bnode*);
+public:
+    BSTree()
+    {
+        root = nullptr;
+
+    }
+    void insertR(T d) {insertR(root,d);}
+    void insertI(T d);
+    bool searchR(T d)
+    {
+        return searchR(root,d);
+    }
+    bool searchI(T d);
+    void deleteR(T d);
+    void deleteI(T d);
+    void PrintR();
+    void PrintI();
+    ~BSTree() 
+    { 
+        Destroy(root);
+        root = nullptr; 
+    }
+};
+
+template <typename Type>
+class BSTree<Type>::Bnode
 {
-    if (colStart > colEnd)          // base case: range finished
-        return;
-    cout << matrix[row][colStart] << " ";
-    printRowLeftToRight(matrix, row, colStart + 1, colEnd);
+public:
+    Type data;
+    Bnode* right;
+    Bnode* left;
+    Bnode(Type& d, Bnode* l = 0 , Bnode* r = 0 )
+    {
+        data = d;
+        left = l;
+        right = r;
+    }
+    ~Bnode()
+    {
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+template <class T>
+bool BSTree<T>::searchR(Bnode* node,T d)
+{
+    if (node) 
+    {
+        if (node -> data > d)
+            return searchR(node -> left, d);
+
+        else if (node -> data < d)
+            return searchR(node -> right, d);
+
+        else
+            return true;
+    }
+    else
+        return false;
+
 }
 
-// b) Top -> Bottom on a fixed column
-void printColumnTopToBottom(int matrix[][MAX], int col, int rowStart, int rowEnd)
-{
-    if (rowStart > rowEnd)
-        return;
-    cout << matrix[rowStart][col] << " ";
-    printColumnTopToBottom(matrix, col, rowStart + 1, rowEnd);
+template <class T>
+bool BSTree<T>::searchI(T key) 
+{    
+    Bnode* iter = root;
+    bool flag = false;
+
+    while (iter && !flag) 
+    {
+        if (iter ->data == key)
+            flag = true;
+
+        else if (iter->data > key)
+            iter= iter->left;
+
+        else
+            iter= iter->right;
+
+    }
+    return flag;
 }
 
-// c) Right -> Left on a fixed row (colStart is the larger index, moves down to colEnd)
-void printRowRightToLeft(int matrix[][MAX], int row, int colStart, int colEnd)
+template <class T>
+void BSTree<T>::insertR(Bnode *& node,T d) 
 {
-    if (colStart < colEnd)
-        return;
-    cout << matrix[row][colStart] << " ";
-    printRowRightToLeft(matrix, row, colStart - 1, colEnd);
+    if (node == NULL)
+        node = new Bnode(d);
+    else if (node->data > d)
+        insertR(node->left,d);
+    else
+        insertR(node->right,d);
 }
 
-// d) Bottom -> Top on a fixed column (rowStart is the larger index, moves up to rowEnd)
-void printColumnBottomToTop(int matrix[][MAX], int col, int rowStart, int rowEnd)
+template <class T>
+void BSTree<T>::insertI(T d) 
 {
-    if (rowStart < rowEnd)
-        return;
-    cout << matrix[rowStart][col] << " ";
-    printColumnBottomToTop(matrix, col, rowStart - 1, rowEnd);
+    Bnode * newBnode = new Bnode(d);
+    Bnode * parent = root;
+    Bnode * child = root;
+
+    while (child) 
+    {
+        parent = child;
+        
+        if (parent -> data > d)
+            child = child -> left;
+        else if (parent -> data <= d)
+            child = child -> right;
+
+    }
+
+    if (parent == NULL)
+        root = newBnode;
+    else if (parent -> data > d)
+        parent -> left = newBnode;
+    else if (parent -> data <= d)
+        parent -> right = newBnode;
+
 }
 
-// e) Spiral: peel one layer, then recurse on the inner matrix
-void printSpiralRecursively(int matrix[][MAX], int top, int bottom, int left, int right)
+template <class T>
+void BSTree<T>::PrintR()
 {
-    if (top > bottom || left > right)   // base case: nothing left
-        return;
+    InOrder(root);
+}
 
-    // 1) top row, left -> right
-    printRowLeftToRight(matrix, top, left, right);
+template <class T>
+void BSTree<T>::InOrder(Bnode *t)
+{
+    if (t) 
+    {
+        InOrder(t->left);
+        visit(t);
+        InOrder(t->right);
+    }
+}
 
-    // 2) right column, top+1 -> bottom (top-right corner already printed)
-    printColumnTopToBottom(matrix, right, top + 1, bottom);
+template <class T>
+void BSTree<T>::Destroy(Bnode *&t)
+{
+    if (t) 
+    {
+        InOrder(t->left);
+        InOrder(t->right);
+        delete t;
+    }
+}
 
-    // 3) bottom row, right-1 -> left (only if it's a different row from top)
-    if (top < bottom)
-        printRowRightToLeft(matrix, bottom, right - 1, left);
+template <typename T>
+void BSTree<T>::deleteR(T d)
+{
+    deleteR(d, root);
+}
 
-    // 4) left column, bottom-1 -> top+1 (only if it's a different column from right)
-    if (left < right)
-        printColumnBottomToTop(matrix, left, bottom - 1, top + 1);
+template <class T>
+void BSTree<T>::deleteR(T d, Bnode *& node) {
+    
+    if (node) 
+    {
+        if (d > node->data)    
+            deleteR(d, node->right);
+        else if (d < node->data)
+            deleteR(d, node->left);
+        else
+            deleteBnode(node);
+    }
+}
 
-    // 5) shrink boundaries and repeat
-    printSpiralRecursively(matrix, top + 1, bottom - 1, left + 1, right - 1);
+template <class T>
+void BSTree<T>::deleteBnode(Bnode *& node) 
+{
+    Bnode * tmp = node;
+    if (node->left == NULL) // Bnode has no left child
+        node = node->right;
+    else if(node->right == NULL) // Bnode has no right child;
+        node = node->left;
+    else
+    { // Bnode has both children
+        tmp = node->left;
+        previous = node;
+        while(tmp->right != NULL){// locate predecessor
+            previous = tmp;
+            tmp=tmp->right;
+        }
+        
+        node->data = tmp->data; // copy data
+        if(previous == node)
+            previous->left = tmp->left
+        else
+            previous -> right = tmp->left
+    }
+    delete tmp;
 }
 
 int main()
 {
-    int matrix[MAX][MAX] = {
-        { 1,  2,  3,  4},
-        { 5,  6,  7,  8},
-        { 9, 10, 11, 12},
-        {13, 14, 15, 16}
-    };
+    BSTree<int> tree1;
+    tree1.insertR(15);
+    tree1.insertR(8);
+    tree1.insertR(20);
+    tree1.insertR(17);
+    tree1.insertR(14);
+    tree1.insertR(12);
+    tree1.insertR(19);
+    tree1.insertR(6);
+    tree1.insertR(78);
 
-    int rows = 4, cols = 4;
-    printSpiralRecursively(matrix, 0, rows - 1, 0, cols - 1);
-    cout << endl;
-    return 0;
+    tree1.PrintR();
+
 }
